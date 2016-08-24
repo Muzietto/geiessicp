@@ -5,7 +5,8 @@ A few JS implementations from the Wizard Book:
 ## chapter 2
 - sets && balanced trees
 - the Huffman trees
-NB - for the picture language see [Geiespictures](see https://github.com/Muzietto/geiespictures)
+
+NB - for the picture language see [Geiespictures](https://github.com/Muzietto/geiespictures)
 
 ## chapter 3
 - constraints propagation
