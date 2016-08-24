@@ -8,7 +8,7 @@
 	The MIT License - Copyright (c) 2016 GeiesSICP Project
 */var expect = chai.expect;
 
-describe('Implementing SICP chapter 2 brings to the realization of', function () {
+describe('Implementing SICP chapter 2 brings to the implementation of', function () {
   var nil = L.nil;
   
   it('a function to build sets as trees in a naive manner', function() {
