@@ -35,7 +35,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         expect(probe.value).to.be.equal(2);
       });
     });
-    describe('an inverter', function () {
+    describe('an inverter (aka NOT gate)', function () {
       it('can carry signal, or not', function() {
         var input = S.wire('input');
         var output = S.wire('output');
@@ -71,7 +71,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
       });
     });
     describe('an alternative OR gate', function () {
-      it('can be built as not(not(A) AND not(B))', function() {
+      it('can be built as NOT(NOT(A) AND NOT(B))', function() {
         var inputA = S.wire('inputA');
         var inputNotA = S.wire('inputNotA');
         var inputB = S.wire('inputB');
@@ -87,9 +87,21 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         inputA.set(true);
         expect(output.read()).to.be.ok;
         inputA.set(false);
-        //expect(output.read()).to.be.not.ok;
+        expect(output.read()).to.be.not.ok;
         inputB.set(true);
-        //expect(output.read()).to.be.ok;
+        expect(output.read()).to.be.ok;
+      });
+    });
+    describe('a half adder', function () {
+      it('xxxx', function() {
+        var a = S.wire('a');
+        var b = S.wire('b');
+        var s = S.wire('s');
+        var c = S.wire('c');
+        var adder = S.half_adder(a, b, s, c);
+        expect(output.read()).to.be.not.ok;
+        inputB.set(true);
+        expect(output.read()).to.be.ok;
       });
     });
   });
