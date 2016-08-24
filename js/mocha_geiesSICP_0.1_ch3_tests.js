@@ -198,6 +198,54 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
       });
     });
 
+    describe('an averager', function () {
+      describe('starts with two inputs', function () {
+        beforeEach(function() {
+          this.inputA = S.value('inputA');
+          this.inputB = S.value('inputB');
+          this.result = S.value('result');
+        });
+        it('computing their average', function() {
+          var ave = S.averager(this.inputA, this.inputB, this.result);
+          this.inputA.set(12);
+          this.inputB.set(14);
+          expect(this.result.read()).to.be.equal(13);
+          expect(console.log.test()).to.contain('result - current value is 13');
+        });
+        it('computing one of them from the average', function() {
+          var ave = S.averager(this.inputA, this.inputB, this.result);
+          this.inputA.set(12);
+          this.result.set(13);
+          expect(this.inputB.read()).to.be.equal(14);
+          expect(console.log.test()).to.contain('inputB - current value is 14');
+        });
+      });
+      xdescribe('moves to work with three inputs', function () {
+        it('computing their average', function() {
+          var result = S.value('result');
+          var otto = S.power(S.constant(2), S.constant(3), result);
+          expect(console.log.test()).to.be.equal('result - current value is 8');
+        });
+        it('computing one of them from the average', function() {
+          var result = S.value('result');
+          var otto = S.power(S.constant(2), S.constant(3), result);
+          expect(console.log.test()).to.be.equal('result - current value is 8');
+        });
+      });
+      xdescribe('...and ends handing whatever number of inputs', function () {
+        it('computing their average', function() {
+          var result = S.value('result');
+          var otto = S.power(S.constant(2), S.constant(3), result);
+          expect(console.log.test()).to.be.equal('result - current value is 8');
+        });
+        it('computing one of them from the average', function() {
+          var result = S.value('result');
+          var otto = S.power(S.constant(2), S.constant(3), result);
+          expect(console.log.test()).to.be.equal('result - current value is 8');
+        });
+      });
+    });
+
     // P = 2 * (C -32)
     describe('a more complex expression', function() {
       var C = S.value('C');
