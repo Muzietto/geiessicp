@@ -337,7 +337,8 @@ var geiessicp = S = function(L) {
       }
     }
   }
-  
+
+  // https://www.cs.umd.edu/class/sum2003/cmsc311/Notes/Comb/adder.html
   function _ripple_carry_adder(as, bs, ss, cout) {
     var _size = as.length;
     var cs = Array(size).fill().map((x,i) => S.wire('c' + i));
