@@ -10,6 +10,8 @@ NB - for the picture language see [Geiespictures](https://github.com/Muzietto/ge
 
 ## chapter 3
 - constraints propagation
-- digital circuits simulator (upcoming)
+- digital circuits simulator
+
+NB - arrow functions have creeped into the code, so this stuff runs only on ES6-ready browsers.
 
 ![wizard](https://github.com/Muzietto/geiessicp/blob/master/img/wizard.jpg)
