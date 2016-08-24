@@ -314,6 +314,16 @@ var geiessicp = S = function(L) {
     return {};
   }
 
+  function _full_adder(a, b, cin, sum, cout) {
+    var s = _wire('s');
+    var c1 = _wire('c1');
+    var c2 = _wire('c2');
+    _half_adder(b, cin, s, c1);
+    _half_adder(a, s, sum, c2);
+    _or_gate(c1, c2, cout);
+    return {};
+  }
+
   return {
     make_tree: make_tree,
     entry: entry,
@@ -339,6 +349,7 @@ var geiessicp = S = function(L) {
     inverter: _inverter,
     and_gate: _and_gate,
     or_gate: _or_gate,
-    half_adder: _half_adder
+    half_adder: _half_adder,
+    full_adder: _full_adder
   };
 }(geieslists);
