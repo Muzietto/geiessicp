@@ -100,7 +100,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         this.c = S.wire('c');
         this.adder = S.half_adder(this.a, this.b, this.s, this.c);
       });
-      it('will turn on s when either a or b are on', function() {
+      it('will turn on s (sum) when either a or b are on', function() {
         expect(this.s.read()).to.be.not.ok;
         this.a.set(true);
         this.b.set(false);
@@ -112,7 +112,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         this.b.set(false);
         expect(this.s.read()).to.be.not.ok;
       });
-      it('will turn c on when both a and b are on', function() {
+      it('will turn on c (carry) when both a and b are on', function() {
         expect(this.c.read()).to.be.not.ok;
         this.a.set(true);
         expect(this.c.read()).to.be.not.ok;
@@ -125,6 +125,67 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         expect(this.c.read()).to.be.not.ok;
       });
     });
+    describe('a full adder', function () {
+      beforeEach(function() {
+        this.a = S.wire('a');
+        this.b = S.wire('b');
+        this.cin = S.wire('cin');
+        this.cout = S.wire('cout');
+        this.sum = S.wire('sum');
+        this.adder = S.full_adder(this.a, this.b, this.cin, this.sum, this.cout);
+      });
+      it('will turn on s (sum) when either a, b or cin are on', function() {
+        expect(this.s.read()).to.be.not.ok;
+        this.a.set(true);
+        expect(this.s.read()).to.be.ok;
+        this.a.set(false);
+        expect(this.s.read()).to.be.not.ok;
+        this.b.set(true);
+        expect(this.s.read()).to.be.ok;
+        this.b.set(false);
+        expect(this.s.read()).to.be.not.ok;
+        this.cin.set(true);
+        expect(this.s.read()).to.be.ok;
+      });
+      it('will turn on s (sum) when all a, b and cin are on', function() {
+        this.a.set(true);
+        this.b.set(true);
+        this.cin.set(true);
+        expect(this.s.read()).to.be.ok;
+      });
+      it('will keep s (sum) off when two of a, b and cin are on', function() {
+        this.a.set(true);
+        expect(this.s.read()).to.be.ok;
+        this.b.set(true);
+        expect(this.s.read()).to.be.not.ok;
+        this.a.set(false);
+        expect(this.s.read()).to.be.ok;
+        this.cin.set(true);
+        expect(this.s.read()).to.be.not.ok;
+        this.b.set(false);
+        expect(this.s.read()).to.be.ok;
+        this.a.set(true);
+        expect(this.s.read()).to.be.not.ok;
+      });
+      it('will turn on cout (carry out) when at least two of a, b and cin are on', function() {
+        expect(this.cout.read()).to.be.not.ok;
+        this.a.set(true);
+        expect(this.cout.read()).to.be.not.ok;
+        this.b.set(true);
+        expect(this.cout.read()).to.be.ok;
+        this.a.set(false);
+        expect(this.cout.read()).to.be.not.ok;
+        this.a.set(true);
+        expect(this.cout.read()).to.be.ok;
+        this.cin.set(true);
+        expect(this.cout.read()).to.be.ok;
+        this.cin.set(false);
+        expect(this.cout.read()).to.be.ok;
+        this.b.set(false);
+        expect(this.cout.read()).to.be.not.ok;
+      });
+    });
+  });
   });
 
   describe('a constraint evaluation system, inside which', function () {
