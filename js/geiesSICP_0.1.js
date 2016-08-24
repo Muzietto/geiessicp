@@ -243,6 +243,30 @@ var geiessicp = S = function(L) {
     };
   }
 
+  var _sum = _applier('sum', (a,b)=>a+b, (a,b)=>a-b);
+
+  var _product = _applier('product', (a,b)=>a*b, (a,b)=>a/b);
+
+  var _power = _applier('power', (a,b)=>Math.pow(a,b), (a,b)=>Math.log(a)/Math.log(b), (a,b)=>Math.pow(a,1/b));
+
+  function _averager() {
+    var inputs = [].splice.call(arguments, 0);
+    var output = inputs.pop();
+    var denom = inputs.length;
+    var firstInput = inputs.shift();
+    var foldInputs = inputs.map(function(input, index) {
+      return {
+        input: input,
+        output: _value('' + index)
+      };
+    });
+    var totalSumOutput = foldInputs.reduce(function(acc, obj) {
+      _sum(acc.output, obj.input, obj.output);
+      return { output: obj.output };
+    }, { output: firstInput }).output;
+    return _product(totalSumOutput, _constant(1/denom), output);
+  }
+
   return {
     make_tree: make_tree,
     entry: entry,
@@ -260,8 +284,9 @@ var geiessicp = S = function(L) {
     dictionaryH, dictionaryH,
     value: _value,
     constant: _constant,
-    sum: _applier('sum', (a,b)=>a+b, (a,b)=>a-b),
-    product: _applier('product', (a,b)=>a*b, (a,b)=>a/b),
-    power: _applier('power', (a,b)=>Math.pow(a,b), (a,b)=>Math.log(a)/Math.log(b), (a,b)=>Math.pow(a,1/b))
+    sum: _sum,
+    product: _product,
+    power: _power,
+    averager: _averager
   };
 }(geieslists);
