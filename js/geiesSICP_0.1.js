@@ -321,7 +321,21 @@ var geiessicp = S = function(L) {
     _half_adder(b, cin, s, c1);
     _half_adder(a, s, sum, c2);
     _or_gate(c1, c2, cout);
-    return {};
+    return {
+      sum: _sum
+    };
+    function _sum(val_a, val_b, val_cin) {
+      _reset();
+      a.set(val_a);
+      b.set(val_b);
+      cin.set(val_cin);
+      return (sum.read() ? 1 : 0) + (cout.read() ? 1 : 0) * 2;
+      function _reset() {
+        a.set(false);
+        b.set(false);
+        cin.set(false);
+      }
+    }
   }
 
   return {
