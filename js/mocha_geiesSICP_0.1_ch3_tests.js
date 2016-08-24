@@ -197,7 +197,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
       });
     });
     describe('a ripple-carry-adder', function() {
-      it('is built from n-sized lists of wires', function() {
+      xit('is built from n-sized lists of wires', function() {
         function wires(name, size) {
           return Array(size).fill().map((x,i) => S.wire(name + i));
         }

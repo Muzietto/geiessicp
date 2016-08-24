@@ -337,6 +337,33 @@ var geiessicp = S = function(L) {
       }
     }
   }
+  
+  function _ripple_carry_adder(as, bs, ss, cout) {
+    var _size = as.length;
+    var cs = Array(size).fill().map((x,i) => S.wire('c' + i));
+
+    return {
+      sum: _sum
+    };
+    function _sum(val_as, val_bs) {
+      var binary_as = val_as.toString(2);
+      var binary_bs = val_bs.toString(2);
+      if (binary_as.length > _size || binary_bs.length > _size) throw new Error('not enough adders to perform this addition');
+      _reset();
+      binary_as.split('')
+        .map(s => Integer.parseInt(2, 10))
+        .forEach((val, index) => as[index].set(val));
+      binary_bs.split('')
+        .map(s => Integer.parseInt(2, 10))
+        .forEach((val, index) => bs[index].set(val));
+      //var binaryString = ss.
+      return (sum.read() ? 1 : 0) + (cout.read() ? 1 : 0) * 2;
+      function _reset() {
+        as.forEach(a => a.set(false));
+        bs.forEach(b => b.set(false));
+      }
+    }    
+  }
 
   return {
     make_tree: make_tree,
@@ -364,6 +391,7 @@ var geiessicp = S = function(L) {
     and_gate: _and_gate,
     or_gate: _or_gate,
     half_adder: _half_adder,
-    full_adder: _full_adder
+    full_adder: _full_adder,
+    ripple_carry_adder: _ripple_carry_adder
   };
 }(geieslists);
