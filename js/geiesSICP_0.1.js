@@ -267,6 +267,43 @@ var geiessicp = S = function(L) {
     return _product(totalSumOutput, _constant(1/denom), output);
   }
 
+  // digital circuit simulator
+  function _wire(name) {
+    var _value = false;
+    var _actions = [];
+    function _set(value, dont_propagate) {
+      if (_value !== value) {
+        console.log(name + ': ' + value)
+        _value = value;
+        if (!dont_propagate) _actions.forEach(cb => cb(value));
+      }
+    }
+    return {
+      read: () => _value,
+      set: _set,
+      add_action: cb => _actions.push(cb)
+    };
+  }
+
+  function _inverter(input, output) {
+    input.add_action(() => output.set(!input.read()));
+    // initialisation
+    output.set(!input.read(), true);
+  }
+  
+  function _two_wires_gate(operation) {
+    return function (inputA, inputB, output) {
+      inputA.add_action(() => output.set(operation(inputA.read(), inputB.read())));
+      inputB.add_action(() => output.set(operation(inputA.read(), inputB.read())));
+      // initialisation
+      output.set(operation(inputA.read(), inputB.read()), true);
+    }
+  }
+
+  var _and_gate = () => _two_wires_gate((a,b) => a&&b);
+
+  var _or_gate = () => _two_wires_gate((a,b) => a||b);
+
   return {
     make_tree: make_tree,
     entry: entry,
@@ -287,6 +324,10 @@ var geiessicp = S = function(L) {
     sum: _sum,
     product: _product,
     power: _power,
-    averager: _averager
+    averager: _averager,
+    wire: _wire,
+    inverter: _inverter,
+    and_gate: _and_gate(),
+    or_gate: _or_gate()
   };
 }(geieslists);
