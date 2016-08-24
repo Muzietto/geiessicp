@@ -184,6 +184,31 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         this.b.set(false);
         expect(this.cout.read()).to.be.not.ok;
       });
+      it('will allow simple arithmetics', function() {
+        var self = this;
+        expect(sum_through_full_adder(0,0,0)).to.be.equal(0);
+        expect(sum_through_full_adder(1,0,0)).to.be.equal(1);
+        expect(sum_through_full_adder(0,1,0)).to.be.equal(1);
+        expect(sum_through_full_adder(0,0,1)).to.be.equal(1);
+        expect(sum_through_full_adder(1,1,0)).to.be.equal(2);
+        expect(sum_through_full_adder(1,0,1)).to.be.equal(2);
+        expect(sum_through_full_adder(0,1,1)).to.be.equal(2);
+        expect(sum_through_full_adder(1,1,1)).to.be.equal(3);
+
+        function sum_through_full_adder(a, b, cin) {
+          reset_adder();
+          self.a.set(a);
+          self.b.set(b);
+          self.cin.set(cin);
+          return (self.sum.read() ? 1 : 0) + (self.cout.read() ? 1 : 0) * 2;
+
+          function reset_adder() {
+            self.a.set(false);
+            self.b.set(false);
+            self.cin.set(false);
+          }
+        }
+      });
     });
   });
 
