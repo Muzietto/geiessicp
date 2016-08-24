@@ -300,9 +300,19 @@ var geiessicp = S = function(L) {
     }
   }
 
-  var _and_gate = () => _two_wires_gate((a,b) => a&&b);
+  var _and_gate = _two_wires_gate((a,b) => a&&b);
 
-  var _or_gate = () => _two_wires_gate((a,b) => a||b);
+  var _or_gate = _two_wires_gate((a,b) => a||b);
+
+  function _half_adder(a, b, s, c) {
+    var d = _wire('d');
+    var e = _wire('e');
+    _or_gate(a, b, d);
+    _and_gate(a, b, c);
+    _inverter(c, e);
+    _and_gate(d, e, s);
+    return {};
+  }
 
   return {
     make_tree: make_tree,
@@ -327,7 +337,8 @@ var geiessicp = S = function(L) {
     averager: _averager,
     wire: _wire,
     inverter: _inverter,
-    and_gate: _and_gate(),
-    or_gate: _or_gate()
+    and_gate: _and_gate,
+    or_gate: _or_gate,
+    half_adder: _half_adder
   };
 }(geieslists);

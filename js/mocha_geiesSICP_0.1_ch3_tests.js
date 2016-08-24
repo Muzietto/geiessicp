@@ -93,15 +93,36 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
       });
     });
     describe('a half adder', function () {
-      it('xxxx', function() {
-        var a = S.wire('a');
-        var b = S.wire('b');
-        var s = S.wire('s');
-        var c = S.wire('c');
-        var adder = S.half_adder(a, b, s, c);
-        expect(output.read()).to.be.not.ok;
-        inputB.set(true);
-        expect(output.read()).to.be.ok;
+      beforeEach(function() {
+        this.a = S.wire('a');
+        this.b = S.wire('b');
+        this.s = S.wire('s');
+        this.c = S.wire('c');
+        this.adder = S.half_adder(this.a, this.b, this.s, this.c);
+      });
+      it('will turn on s when either a or b are on', function() {
+        expect(this.s.read()).to.be.not.ok;
+        this.a.set(true);
+        this.b.set(false);
+        expect(this.s.read()).to.be.ok;
+        this.a.set(false);
+        expect(this.s.read()).to.be.not.ok;
+        this.b.set(true);
+        expect(this.s.read()).to.be.ok;
+        this.b.set(false);
+        expect(this.s.read()).to.be.not.ok;
+      });
+      it('will turn c on when both a and b are on', function() {
+        expect(this.c.read()).to.be.not.ok;
+        this.a.set(true);
+        expect(this.c.read()).to.be.not.ok;
+        this.b.set(true);
+        expect(this.c.read()).to.be.ok;
+        this.a.set(false);
+        expect(this.c.read()).to.be.not.ok;
+        this.a.set(true);
+        this.b.set(false);
+        expect(this.c.read()).to.be.not.ok;
       });
     });
   });
