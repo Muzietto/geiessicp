@@ -9,12 +9,91 @@
 */
 
 var expect = chai.expect;
-//		expect(head(head(listlA_BA))).to.be.equal('a');
-//		expect(isEmpty(tail(head(listlA_BA)))).to.be.ok;
-//		expect(isEmpty(tail(EMPTY))).to.be.not.ok;
-//     expect(V.length_vect(pippo)).to.be.gt(3.16);
 
 describe('Implementing SICP chapter 3 brings to the implementation of', function () {
+  describe('a digital circuit simulation system, inside which', function () {
+    describe('a wire', function () {
+      it('can carry signal, or not', function() {
+        var test = S.wire('test');
+        expect(test.read()).to.be.not.ok;
+        test.set(true);
+        expect(test.read()).to.be.ok;
+        test.set(false);
+        expect(test.read()).to.be.not.ok;
+      });
+      it('accepts callbacks to execute when its own signal changes', function() {
+        var probe = { value: 0 };
+        var test = S.wire('test');
+        test.add_action(() => probe.value += 1);
+
+        expect(probe.value).to.be.equal(0);
+        test.set(true);
+        expect(probe.value).to.be.equal(1);
+        test.set(true);
+        expect(probe.value).to.be.equal(1);
+        test.set(false);
+        expect(probe.value).to.be.equal(2);
+      });
+    });
+    describe('an inverter', function () {
+      it('can carry signal, or not', function() {
+        var input = S.wire('input');
+        var output = S.wire('output');
+        var test = S.inverter(input, output);
+        expect(output.read()).to.be.ok;
+        input.set(true);
+        expect(output.read()).to.be.not.ok;
+        input.set(false);
+        expect(output.read()).to.be.ok;
+      });
+    });
+    describe('an AND gate', function () {
+      it('keeps track of two wires', function() {
+        var inputA = S.wire('inputA');
+        var inputB = S.wire('inputB');
+        var output = S.wire('output');
+        var test = S.and_gate(inputA, inputB, output);
+        inputA.set(true);
+        expect(output.read()).to.be.not.ok;
+        inputB.set(true);
+        expect(output.read()).to.be.ok;
+      });
+    });
+    describe('an OR gate', function () {
+      it('keeps track of two wires', function() {
+        var inputA = S.wire('inputA');
+        var inputB = S.wire('inputB');
+        var output = S.wire('output');
+        var test = S.or_gate(inputA, inputB, output);
+        expect(output.read()).to.be.not.ok;
+        inputB.set(true);
+        expect(output.read()).to.be.ok;
+      });
+    });
+    describe('an alternative OR gate', function () {
+      it('can be built as not(not(A) AND not(B))', function() {
+        var inputA = S.wire('inputA');
+        var inputNotA = S.wire('inputNotA');
+        var inputB = S.wire('inputB');
+        var inputNotB = S.wire('inputNotB');
+        var inner = S.wire('inner');
+        var output = S.wire('output');
+        S.inverter(inputA, inputNotA);
+        S.inverter(inputB, inputNotB);
+        S.and_gate(inputNotA, inputNotB, inner);
+        S.inverter(inner, output);
+
+        expect(output.read()).to.be.not.ok;
+        inputA.set(true);
+        expect(output.read()).to.be.ok;
+        inputA.set(false);
+        //expect(output.read()).to.be.not.ok;
+        inputB.set(true);
+        //expect(output.read()).to.be.ok;
+      });
+    });
+  });
+
   describe('a constraint evaluation system, inside which', function () {
     var _consoleLog = null;
     var probe = function() {
