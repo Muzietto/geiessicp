@@ -196,6 +196,27 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         expect(this.adder.sum(1,1,1)).to.be.equal(3);
       });
     });
+    describe('a ripple-carry-adder', function() {
+      it('is built from n-sized lists of wires', function() {
+        function wires(name, size) {
+          return Array(size).fill().map((x,i) => S.wire(name + i));
+        }
+        var as = wires('a', 3);
+        var bs = wires('b', 3);
+        var ss = wires('s', 3);
+        var cout = S.wire('cout');
+
+        var rca = S.ripple_carry_adder(as, bs, ss, cout);
+        expect(rcs.sum(0,0)).to.be.equal(0);
+        expect(rcs.sum(2,3)).to.be.equal(5);
+        expect(rcs.sum(4,1)).to.be.equal(5);
+        expect(rcs.sum(4,3)).to.be.equal(7);
+        expect(rcs.sum(4,4)).to.be.equal(8);
+        expect(rcs.sum(7,7)).to.be.equal(14);
+        expect(() => rcs.sum(7,8)).to.throw;
+        expect(() => rcs.sum(8,0)).to.throw;
+      });
+    });
   });
 
   describe('a constraint evaluation system, inside which', function () {
