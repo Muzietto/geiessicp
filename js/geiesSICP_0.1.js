@@ -291,11 +291,13 @@ var geiessicp = S = function(L) {
     input.add_action(() => output.set(!input.read()));
   }
 
-  function _inverter2(input, output, delay) {
-    delay = delay || 5;
+  // event-based
+  function _inverterEB(input, output, delayOrAgenda, agenda) {
+    var delay = (agenda) ? delayOrAgenda : 5;
+    agenda = agenda || delayOrAgenda;
     input.add_action(invertInput);
     function invertInput() {
-      _afterDelay(delay, () => output.set(!input.read()))
+      _afterDelay(delay, () => output.set(!input.read()), agenda);
     }
   }
 
