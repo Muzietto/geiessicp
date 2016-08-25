@@ -287,12 +287,40 @@ var geiessicp = S = function(L) {
     };
   }
 
-  function _inverter(input, output) {
+  function _wire2(name) {
+    var _value = false;
+    var _actions = [];
+    function _set(value, dont_propagate) {
+      if (value === 0) value = false;
+      if (value === 1) value = true;
+      if (_value !== value) {
+        console.log(name + ': ' + value)
+        _value = value;
+        _actions.forEach(cb => cb());
+      }
+    }
+    return {
+      read: () => _value,
+      set: _set,
+      add_action: cb => { _actions.push(cb); cb(); }
+    };
+  }
+
+  function _inverter(input, output, delay) {
+    delay = delay || 5;
     input.add_action(() => output.set(!input.read()));
     // initialisation
     output.set(!input.read(), true);
   }
-  
+
+  function _inverter2(input, output, delay) {
+    delay = delay || 5;
+    input.add_action(invertInput);
+    function invertInput() {
+      _afterDelay(delay, () => output.set(!input.read()))
+    }
+  }
+
   function _two_wires_gate(operation) {
     return function (inputA, inputB, output) {
       inputA.add_action(() => output.set(operation(inputA.read(), inputB.read())));
@@ -305,6 +333,28 @@ var geiessicp = S = function(L) {
   var _and_gate = _two_wires_gate((a,b) => a&&b);
 
   var _or_gate = _two_wires_gate((a,b) => a||b);
+
+  function _and_gate2(inputA, inputB, output, delay) {
+    delay = delay || 8;
+    inputA.add_action(andActionProcedure);
+    inputB.add_action(andActionProcedure);
+    function andActionProcedure() {
+      _afterDelay(delay, () => output.set(inputA.read() && inputB.read()))      
+    }
+  }
+
+  function _or_gate2(inputA, inputB, output, delay) {
+    delay = delay || 7;
+    inputA.add_action(orActionProcedure);
+    inputB.add_action(orActionProcedure);
+    function orActionProcedure() {
+      _afterDelay(delay, () => output.set(inputA.read() || inputB.read()))      
+    }
+  }
+
+  function _afterDelay(delay, cb) {
+    cb();
+  }
 
   function _half_adder(a, b, s, c) {
     var d = _wire('d');
@@ -345,7 +395,7 @@ var geiessicp = S = function(L) {
     var _size = as.length;
     if (bs.length !== _size || ss.length !== _size) throw new Error('ripple carry adder requires equal input/output to have equal size');
     var cs = Array(_size).fill().map((x,i) => _wire('c' + i));
-    
+
     as.forEach((a, index) => {
       var currentCout = (index === _size-1) ? cout : cs[index+1];
       _full_adder(as[index], bs[index], cs[index], ss[index], currentCout);
@@ -405,10 +455,10 @@ var geiessicp = S = function(L) {
     product: _product,
     power: _power,
     averager: _averager,
-    wire: _wire,
-    inverter: _inverter,
-    and_gate: _and_gate,
-    or_gate: _or_gate,
+    wire: _wire2,
+    inverter: _inverter2,
+    and_gate: _and_gate2,
+    or_gate: _or_gate2,
     half_adder: _half_adder,
     full_adder: _full_adder,
     ripple_carry_adder: _ripple_carry_adder
