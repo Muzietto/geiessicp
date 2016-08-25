@@ -12,6 +12,14 @@ var expect = chai.expect;
 
 describe('Implementing SICP chapter 3 brings to the implementation of', function () {
   describe('a digital circuit simulation system, inside which', function () {
+    xdescribe('an agenda', function () {
+      it('keeps track of all events', function() {
+        var probe = { value: false };
+        var agenda = S.agenda();
+        var wire = S.wire('test');
+        wire.add_action(() => { probe.value = true; }, 5);
+      });
+    });
     describe('a wire', function () {
       it('can carry signal, or not', function() {
         var test = S.wire('test');
@@ -29,7 +37,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         test.set(0);
         expect(test.read()).to.be.not.ok;
       });
-      it('accepts callbacks to execute when its own signal changes', function() {
+      xit('accepts callbacks to execute when its own signal changes', function() {
         var probe = { value: 0 };
         var test = S.wire('test');
         test.add_action(() => probe.value += 1);
