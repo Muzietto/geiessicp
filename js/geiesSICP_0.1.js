@@ -287,8 +287,7 @@ var geiessicp = S = function(L) {
     };
   }
 
-  function _inverter(input, output, delay) {
-    delay = delay || 5;
+  function _inverter(input, output) {
     input.add_action(() => output.set(!input.read()));
   }
 
