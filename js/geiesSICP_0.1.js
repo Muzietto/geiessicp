@@ -307,27 +307,18 @@ var geiessicp = S = function(L) {
     }
   }
 
-  var _and_gate = _two_wires_gate((a,b) => a&&b);
+  function _two_wires_gate2(operation) {
+    return function (inputA, inputB, output, delay) {
+      inputA.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read()))));
+      inputB.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read()))));
+    }
+  }
 
+  var _and_gate = _two_wires_gate((a,b) => a&&b);
   var _or_gate = _two_wires_gate((a,b) => a||b);
 
-  function _and_gate2(inputA, inputB, output, delay) {
-    delay = delay || 8;
-    inputA.add_action(andActionProcedure);
-    inputB.add_action(andActionProcedure);
-    function andActionProcedure() {
-      _afterDelay(delay, () => output.set(inputA.read() && inputB.read()))      
-    }
-  }
-
-  function _or_gate2(inputA, inputB, output, delay) {
-    delay = delay || 7;
-    inputA.add_action(orActionProcedure);
-    inputB.add_action(orActionProcedure);
-    function orActionProcedure() {
-      _afterDelay(delay, () => output.set(inputA.read() || inputB.read()))      
-    }
-  }
+  var _and_gate2 = _two_wires_gate2((a,b) => a&&b);
+  var _or_gate2 = _two_wires_gate2((a,b) => a||b);
 
   function _afterDelay(delay, cb) {
     cb();
@@ -408,7 +399,7 @@ var geiessicp = S = function(L) {
         .map(s => parseInt(s, 10))
         .forEach((val, index) => wires[index].set(val));        
       }
-    }    
+    }
   }
 
   return {
@@ -433,9 +424,9 @@ var geiessicp = S = function(L) {
     power: _power,
     averager: _averager,
     wire: _wire,
-    inverter: _inverter,
-    and_gate: _and_gate,
-    or_gate: _or_gate,
+    inverter: _inverter2,
+    and_gate: _and_gate2,
+    or_gate: _or_gate2,
     half_adder: _half_adder,
     full_adder: _full_adder,
     ripple_carry_adder: _ripple_carry_adder
