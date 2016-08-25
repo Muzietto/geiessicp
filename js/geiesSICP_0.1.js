@@ -287,25 +287,6 @@ var geiessicp = S = function(L) {
     };
   }
 
-  function _wire2(name) {
-    var _value = false;
-    var _actions = [];
-    function _set(value) {
-      if (value === 0) value = false;
-      if (value === 1) value = true;
-      if (_value !== value) {
-        console.log(name + ': ' + value)
-        _value = value;
-        _actions.forEach(cb => cb());
-      }
-    }
-    return {
-      read: () => _value,
-      set: _set,
-      add_action: cb => { _actions.push(cb); cb(); }
-    };
-  }
-
   function _inverter(input, output, delay) {
     delay = delay || 5;
     input.add_action(() => output.set(!input.read()));
