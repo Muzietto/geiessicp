@@ -319,8 +319,28 @@ var geiessicp = S = function(L) {
   var _and_gate2 = _two_wires_gate2((a,b) => a&&b);
   var _or_gate2 = _two_wires_gate2((a,b) => a||b);
 
-  function _afterDelay(delay, cb) {
-    cb();
+  var _afterDelay = (function(agenda) {
+    return function(delay, cb, optionalAgenda) {
+      if (optionalAgenda) agenda = optionalAgenda;
+      agenda.addEvent(delay, cb);
+    }
+  })(_AGENDA());
+
+  function _AGENDA() {
+    var _epoch = 0;
+    var _events = {};
+    
+    function _addEvent(delay, cb) {
+      try {
+        _events[_epoch + delay].push(cb);
+      } catch (e) {
+        _events[_epoch + delay] = [cb];
+      }
+    }
+    return {
+      isEmpty: () => (Object.keys(_events).length === 0),
+      addEvent: _addEvent
+    };
   }
 
   function _half_adder(a, b, s, c) {
