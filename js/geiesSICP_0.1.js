@@ -306,7 +306,7 @@ var geiessicp = S = function(L) {
     }
   }
 
-  function _two_wires_gate2(operation) {
+  function _two_wires_gateEB(operation) {
     return function (inputA, inputB, output, delay) {
       inputA.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read()))));
       inputB.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read()))));
@@ -316,8 +316,9 @@ var geiessicp = S = function(L) {
   var _and_gate = _two_wires_gate((a,b) => a&&b);
   var _or_gate = _two_wires_gate((a,b) => a||b);
 
-  var _and_gate2 = _two_wires_gate2((a,b) => a&&b);
-  var _or_gate2 = _two_wires_gate2((a,b) => a||b);
+  // event-based
+  var _and_gateEB = _two_wires_gateEB((a,b) => a&&b);
+  var _or_gateEB = _two_wires_gateEB((a,b) => a||b);
 
   var _afterDelay = (function(agenda) {
     return function(delay, cb, optionalAgenda) {
@@ -443,9 +444,13 @@ var geiessicp = S = function(L) {
     power: _power,
     averager: _averager,
     wire: _wire,
-    inverter: _inverter2,
-    and_gate: _and_gate2,
-    or_gate: _or_gate2,
+    inverter: _inverter,
+    and_gate: _and_gate,
+    or_gate: _or_gate,
+    inverterEB: _inverterEB,
+    and_gateEB: _and_gateEB,
+    or_gateEB: _or_gateEB,
+    agenda: _AGENDA,
     half_adder: _half_adder,
     full_adder: _full_adder,
     ripple_carry_adder: _ripple_carry_adder
