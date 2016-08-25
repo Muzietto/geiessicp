@@ -11,15 +11,7 @@
 var expect = chai.expect;
 
 describe('Implementing SICP chapter 3 brings to the implementation of', function () {
-  describe('a digital circuit simulation system, inside which', function () {
-    xdescribe('an agenda', function () {
-      it('keeps track of all events', function() {
-        var probe = { value: false };
-        var agenda = S.agenda();
-        var wire = S.wire('test');
-        wire.add_action(() => { probe.value = true; }, 5);
-      });
-    });
+  describe('a digital circuit simulation system WITHOUT DELAYS, inside which', function () {
     describe('a wire', function () {
       it('can carry signal, or not', function() {
         var wire = S.wire('test');
@@ -48,7 +40,6 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         });
         it('and each time the wire\'s signal changes', function() {
           this.wire.add_action(() => this.probe.value += 1);
-
           expect(this.probe.value).to.be.equal(1);
           this.wire.set(true);
           expect(this.probe.value).to.be.equal(2);
@@ -116,7 +107,7 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         expect(output.read()).to.be.ok;
       });
     });
-    describe('a half adder', function () {
+    describe('an half adder', function () {
       beforeEach(function() {
         this.a = S.wire('a');
         this.b = S.wire('b');
@@ -253,6 +244,18 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
 
         var rca = S.ripple_carry_adder(as, bs, ss, cout);
         expect(rca.sum(33539865,268289782)).to.be.equal(301829647);
+      });
+    });
+  });
+  describe('an EVENT-BASED digital circuit simulation system, inside which', function () {
+    describe('an agenda', function () {
+      it('keeps track of all events involving inverters and gates', function() {
+        var agenda = S.agenda();
+        var a = S.wire('a');
+        var out = S.wire('out');
+        expect(agenda.isEmpty()).to.be.ok;
+        S.inverterEB(a, out, agenda);
+        expect(agenda.isEmpty()).to.be.not.ok;
       });
     });
   });
