@@ -21,6 +21,14 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         test.set(false);
         expect(test.read()).to.be.not.ok;
       });
+      it('can accept 1/0 and convert it to true/false', function() {
+        var test = S.wire('test');
+        expect(test.read()).to.be.not.ok;
+        test.set(1);
+        expect(test.read()).to.be.ok;
+        test.set(0);
+        expect(test.read()).to.be.not.ok;
+      });
       it('accepts callbacks to execute when its own signal changes', function() {
         var probe = { value: 0 };
         var test = S.wire('test');
@@ -197,24 +205,38 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
       });
     });
     describe('a ripple-carry-adder', function() {
-      xit('is built from n-sized lists of wires', function() {
+      it('is built from n-sized lists of wires', function() {
         function wires(name, size) {
           return Array(size).fill().map((x,i) => S.wire(name + i));
         }
-        var as = wires('a', 3);
-        var bs = wires('b', 3);
-        var ss = wires('s', 3);
+        var size = 3;
+        var as = wires('a', size);
+        var bs = wires('b', size);
+        var ss = wires('s', size);
         var cout = S.wire('cout');
 
         var rca = S.ripple_carry_adder(as, bs, ss, cout);
-        expect(rcs.sum(0,0)).to.be.equal(0);
-        expect(rcs.sum(2,3)).to.be.equal(5);
-        expect(rcs.sum(4,1)).to.be.equal(5);
-        expect(rcs.sum(4,3)).to.be.equal(7);
-        expect(rcs.sum(4,4)).to.be.equal(8);
-        expect(rcs.sum(7,7)).to.be.equal(14);
-        expect(() => rcs.sum(7,8)).to.throw;
-        expect(() => rcs.sum(8,0)).to.throw;
+        expect(() => rca.sum(7,8)).to.throw;
+        expect(() => rca.sum(8,0)).to.throw;
+        expect(rca.sum(0,0)).to.be.equal(0);
+        expect(rca.sum(2,3)).to.be.equal(5);
+        expect(rca.sum(4,1)).to.be.equal(5);
+        expect(rca.sum(4,3)).to.be.equal(7);
+        expect(rca.sum(4,4)).to.be.equal(8);
+        expect(rca.sum(7,7)).to.be.equal(14);
+      });
+      it('can carry out some pretty impressive calculations!!', function() {
+        function wires(name, size) {
+          return Array(size).fill().map((x,i) => S.wire(name + i));
+        }
+        var size = 30;
+        var as = wires('a', size);
+        var bs = wires('b', size);
+        var ss = wires('s', size);
+        var cout = S.wire('cout');
+
+        var rca = S.ripple_carry_adder(as, bs, ss, cout);
+        expect(rca.sum(33539865,268289782)).to.be.equal(301829647);
       });
     });
   });
