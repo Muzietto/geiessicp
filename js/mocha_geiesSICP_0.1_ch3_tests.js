@@ -22,33 +22,41 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
     });
     describe('a wire', function () {
       it('can carry signal, or not', function() {
-        var test = S.wire('test');
-        expect(test.read()).to.be.not.ok;
-        test.set(true);
-        expect(test.read()).to.be.ok;
-        test.set(false);
-        expect(test.read()).to.be.not.ok;
+        var wire = S.wire('test');
+        expect(wire.read()).to.be.not.ok;
+        wire.set(true);
+        expect(wire.read()).to.be.ok;
+        wire.set(false);
+        expect(wire.read()).to.be.not.ok;
       });
       it('can accept 1/0 and convert it to true/false', function() {
-        var test = S.wire('test');
-        expect(test.read()).to.be.not.ok;
-        test.set(1);
-        expect(test.read()).to.be.ok;
-        test.set(0);
-        expect(test.read()).to.be.not.ok;
+        var wire = S.wire('test');
+        expect(wire.read()).to.be.not.ok;
+        wire.set(1);
+        expect(wire.read()).to.be.ok;
+        wire.set(0);
+        expect(wire.read()).to.be.not.ok;
       });
-      xit('accepts callbacks to execute when its own signal changes', function() {
-        var probe = { value: 0 };
-        var test = S.wire('test');
-        test.add_action(() => probe.value += 1);
+      describe('accepts callbacks', function() {
+        beforeEach(function() {
+          this.probe = { value: 0 };
+          this.wire = S.wire('test');          
+        });
+        it('that gets executed once, immediately after registration', function() {
+          this.wire.add_action(() => this.probe.value += 1);
+          expect(this.probe.value).to.be.equal(1);
+        });
+        it('and each time the wire\'s signal changes', function() {
+          this.wire.add_action(() => this.probe.value += 1);
 
-        expect(probe.value).to.be.equal(0);
-        test.set(true);
-        expect(probe.value).to.be.equal(1);
-        test.set(true);
-        expect(probe.value).to.be.equal(1);
-        test.set(false);
-        expect(probe.value).to.be.equal(2);
+          expect(this.probe.value).to.be.equal(1);
+          this.wire.set(true);
+          expect(this.probe.value).to.be.equal(2);
+          this.wire.set(true);
+          expect(this.probe.value).to.be.equal(2);
+          this.wire.set(false);
+          expect(this.probe.value).to.be.equal(3);
+        });
       });
     });
     describe('an inverter (aka NOT gate)', function () {

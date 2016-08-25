@@ -271,26 +271,26 @@ var geiessicp = S = function(L) {
   function _wire(name) {
     var _value = false;
     var _actions = [];
-    function _set(value, dont_propagate) {
+    function _set(value) {
       if (value === 0) value = false;
       if (value === 1) value = true;
       if (_value !== value) {
         console.log(name + ': ' + value)
         _value = value;
-        if (!dont_propagate) _actions.forEach(cb => cb(value));
+        _actions.forEach(cb => cb(value));
       }
     }
     return {
       read: () => _value,
       set: _set,
-      add_action: cb => _actions.push(cb)
+      add_action: cb => { _actions.push(cb); cb(); }
     };
   }
 
   function _wire2(name) {
     var _value = false;
     var _actions = [];
-    function _set(value, dont_propagate) {
+    function _set(value) {
       if (value === 0) value = false;
       if (value === 1) value = true;
       if (_value !== value) {
@@ -309,8 +309,6 @@ var geiessicp = S = function(L) {
   function _inverter(input, output, delay) {
     delay = delay || 5;
     input.add_action(() => output.set(!input.read()));
-    // initialisation
-    output.set(!input.read(), true);
   }
 
   function _inverter2(input, output, delay) {
@@ -325,8 +323,6 @@ var geiessicp = S = function(L) {
     return function (inputA, inputB, output) {
       inputA.add_action(() => output.set(operation(inputA.read(), inputB.read())));
       inputB.add_action(() => output.set(operation(inputA.read(), inputB.read())));
-      // initialisation
-      output.set(operation(inputA.read(), inputB.read()), true);
     }
   }
 
@@ -455,10 +451,10 @@ var geiessicp = S = function(L) {
     product: _product,
     power: _power,
     averager: _averager,
-    wire: _wire2,
-    inverter: _inverter2,
-    and_gate: _and_gate2,
-    or_gate: _or_gate2,
+    wire: _wire,
+    inverter: _inverter,
+    and_gate: _and_gate,
+    or_gate: _or_gate,
     half_adder: _half_adder,
     full_adder: _full_adder,
     ripple_carry_adder: _ripple_carry_adder
