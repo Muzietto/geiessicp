@@ -272,6 +272,8 @@ var geiessicp = S = function(L) {
     var _value = false;
     var _actions = [];
     function _set(value, dont_propagate) {
+      if (value === 0) value = false;
+      if (value === 1) value = true;
       if (_value !== value) {
         console.log(name + ': ' + value)
         _value = value;
@@ -341,27 +343,43 @@ var geiessicp = S = function(L) {
   // https://www.cs.umd.edu/class/sum2003/cmsc311/Notes/Comb/adder.html
   function _ripple_carry_adder(as, bs, ss, cout) {
     var _size = as.length;
-    var cs = Array(size).fill().map((x,i) => S.wire('c' + i));
+    if (bs.length !== _size || ss.length !== _size) throw new Error('ripple carry adder requires equal input/output to have equal size');
+    var cs = Array(_size).fill().map((x,i) => _wire('c' + i));
+    
+    as.forEach((a, index) => {
+      var currentCout = (index === _size-1) ? cout : cs[index+1];
+      _full_adder(as[index], bs[index], cs[index], ss[index], currentCout);
+    });
 
     return {
       sum: _sum
     };
     function _sum(val_as, val_bs) {
-      var binary_as = val_as.toString(2);
-      var binary_bs = val_bs.toString(2);
-      if (binary_as.length > _size || binary_bs.length > _size) throw new Error('not enough adders to perform this addition');
+      if (val_as >= Math.pow(2, _size) || val_bs >= Math.pow(2, _size)) {
+        throw new Error('not enough adders to perform this addition');
+      }
       _reset();
-      binary_as.split('')
-        .map(s => Integer.parseInt(2, 10))
-        .forEach((val, index) => as[index].set(val));
-      binary_bs.split('')
-        .map(s => Integer.parseInt(2, 10))
-        .forEach((val, index) => bs[index].set(val));
-      //var binaryString = ss.
-      return (sum.read() ? 1 : 0) + (cout.read() ? 1 : 0) * 2;
+      // e.g. 3 -> '1100' (using 4 adders)
+      var binary_as = padLeft(_size, val_as.toString(2)).reverse();
+      var binary_bs = padLeft(_size, val_bs.toString(2)).reverse();
+      setInputWires(as, binary_as);
+      setInputWires(bs, binary_bs);
+
+      var result = ss.concat([cout]).reduce((acc, s, index) => acc + s.read()*Math.pow(2,index),0);
+      return result;
+
       function _reset() {
         as.forEach(a => a.set(false));
         bs.forEach(b => b.set(false));
+      }
+      function padLeft(totalLength, string, paddingChar){
+        if (string.length > totalLength) return string.slice(0, totalLength);
+        return Array(totalLength+1 - string.length).join(paddingChar||'0') + string;
+      }
+      function setInputWires(wires, binaryDigitString) {
+      binaryDigitString.split('')
+        .map(s => parseInt(s, 10))
+        .forEach((val, index) => wires[index].set(val));        
       }
     }    
   }
