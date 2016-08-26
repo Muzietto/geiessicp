@@ -275,12 +275,12 @@ var geiessicp = S = function(L) {
       if (value === 0) value = false;
       if (value === 1) value = true;
       if (_value !== value) {
-        console.log(name + ': ' + value)
         _value = value;
         _actions.forEach(cb => cb(value));
       }
     }
     return {
+      name: () => name,
       read: () => _value,
       set: _set,
       add_action: cb => { _actions.push(cb); cb(); }
@@ -292,9 +292,8 @@ var geiessicp = S = function(L) {
   }
 
   // event-based implementation
-  function _inverterEB(input, output, delayOrAgenda, agenda) {
-    var delay = (agenda) ? delayOrAgenda : 5;
-    agenda = agenda || delayOrAgenda;
+  function _inverterEB(input, output, delay, agenda) {
+    if ([].splice.call(arguments,0).length < 4) throw new Error('event-based inverters require both a delay and an agenda');
     input.add_action(invertInput);
     function invertInput() {
       _afterDelay(delay, () => output.set(!input.read()), agenda);
@@ -309,9 +308,10 @@ var geiessicp = S = function(L) {
   }
 
   function _two_wires_gateEB(operation) {
-    return function (inputA, inputB, output, delay) {
-      inputA.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read()))));
-      inputB.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read()))));
+    return function (inputA, inputB, output, delay, agenda) {
+      if ([].splice.call(arguments,0).length < 5) throw new Error('event-based gates require both a delay and an agenda');
+      inputA.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read())), agenda));
+      inputB.add_action(() => _afterDelay(delay, () => output.set(operation(inputA.read(), inputB.read())), agenda));
     }
   }
 
@@ -325,7 +325,7 @@ var geiessicp = S = function(L) {
   var _afterDelay = (function(agenda) {
     return function(delay, cb, optionalAgenda) {
       if (optionalAgenda) agenda = optionalAgenda;
-      agenda.addEvent(delay, cb);
+      agenda.add_event(delay, cb);
     }
   })(_AGENDA());
 
@@ -351,8 +351,9 @@ var geiessicp = S = function(L) {
       }
     }
     return {
-      isEmpty: () => (Object.keys(_events).length === 0),
-      addEvent: _addEvent,
+      epoch: () => _epoch,
+      is_empty: () => (Object.keys(_events).length === 0),
+      add_event: _addEvent,
       start: _start
     };
   }
@@ -364,6 +365,17 @@ var geiessicp = S = function(L) {
     _and_gate(a, b, c);
     _inverter(c, e);
     _and_gate(d, e, s);
+    return {};
+  }
+
+  function _half_adderEB(a, b, s, c, agenda) {
+    if ([].splice.call(arguments,0).length < 5) throw new Error('event-based half adders require an agenda');
+    var d = _wire('d');
+    var e = _wire('e');
+    _or_gateEB(a, b, d, 8, agenda);
+    _and_gateEB(a, b, c, 10, agenda);
+    _inverterEB(c, e, 5, agenda);
+    _and_gateEB(d, e, s, 10, agenda);
     return {};
   }
 
@@ -391,6 +403,31 @@ var geiessicp = S = function(L) {
     }
   }
 
+  function _full_adderEB(a, b, cin, sum, cout, agenda) {
+    if ([].splice.call(arguments,0).length < 6) throw new Error('event-based full adders require an agenda');
+    var s = _wire('s');
+    var c1 = _wire('c1');
+    var c2 = _wire('c2');
+    _half_adderEB(b, cin, s, c1, agenda);
+    _half_adderEB(a, s, sum, c2, agenda);
+    _or_gateEB(c1, c2, cout, 8, agenda);
+    return {
+      sum: _sum
+    };
+    function _sum(val_a, val_b, val_cin) {
+      _reset();
+      a.set(val_a);
+      b.set(val_b);
+      cin.set(val_cin);
+      return (sum.read() ? 1 : 0) + (cout.read() ? 1 : 0) * 2;
+      function _reset() {
+        a.set(false);
+        b.set(false);
+        cin.set(false);
+      }
+    }
+  }
+
   // https://www.cs.umd.edu/class/sum2003/cmsc311/Notes/Comb/adder.html
   function _ripple_carry_adder(as, bs, ss, cout) {
     var _size = as.length;
@@ -400,6 +437,50 @@ var geiessicp = S = function(L) {
     as.forEach((a, index) => {
       var currentCout = (index === _size-1) ? cout : cs[index+1];
       _full_adder(as[index], bs[index], cs[index], ss[index], currentCout);
+    });
+
+    return {
+      sum: _sum
+    };
+    function _sum(val_as, val_bs) {
+      if (val_as >= Math.pow(2, _size) || val_bs >= Math.pow(2, _size)) {
+        throw new Error('not enough adders to perform this addition');
+      }
+      _reset();
+      // e.g. 3 -> '1100' (using 4 adders)
+      var binary_as = padLeft(_size, val_as.toString(2)).reverse();
+      var binary_bs = padLeft(_size, val_bs.toString(2)).reverse();
+      setInputWires(as, binary_as);
+      setInputWires(bs, binary_bs);
+
+      var result = ss.concat([cout]).reduce((acc, s, index) => acc + s.read()*Math.pow(2,index),0);
+      return result;
+
+      function _reset() {
+        as.forEach(a => a.set(false));
+        bs.forEach(b => b.set(false));
+      }
+      function padLeft(totalLength, string, paddingChar){
+        if (string.length > totalLength) return string.slice(0, totalLength);
+        return Array(totalLength+1 - string.length).join(paddingChar||'0') + string;
+      }
+      function setInputWires(wires, binaryDigitString) {
+      binaryDigitString.split('')
+        .map(s => parseInt(s, 10))
+        .forEach((val, index) => wires[index].set(val));        
+      }
+    }
+  }
+
+  function _ripple_carry_adderEB(as, bs, ss, cout, agenda) {
+    if ([].splice.call(arguments,0).length < 5) throw new Error('event-based ripple carry adders require an agenda');
+    var _size = as.length;
+    if (bs.length !== _size || ss.length !== _size) throw new Error('ripple carry adder requires equal input/output to have equal size');
+    var cs = Array(_size).fill().map((x,i) => _wire('c' + i));
+
+    as.forEach((a, index) => {
+      var currentCout = (index === _size-1) ? cout : cs[index+1];
+      _full_adderEB(as[index], bs[index], cs[index], ss[index], currentCout, agenda);
     });
 
     return {
@@ -465,7 +546,10 @@ var geiessicp = S = function(L) {
     or_gateEB: _or_gateEB,
     agenda: _AGENDA,
     half_adder: _half_adder,
+    half_adderEB: _half_adderEB,
     full_adder: _full_adder,
-    ripple_carry_adder: _ripple_carry_adder
+    full_adderEB: _full_adderEB,
+    ripple_carry_adder: _ripple_carry_adder,
+    ripple_carry_adderEB: _ripple_carry_adderEB
   };
 }(geieslists);
