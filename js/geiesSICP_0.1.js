@@ -291,7 +291,7 @@ var geiessicp = S = function(L) {
     input.add_action(() => output.set(!input.read()));
   }
 
-  // event-based
+  // event-based implementation
   function _inverterEB(input, output, delayOrAgenda, agenda) {
     var delay = (agenda) ? delayOrAgenda : 5;
     agenda = agenda || delayOrAgenda;
@@ -318,7 +318,7 @@ var geiessicp = S = function(L) {
   var _and_gate = _two_wires_gate((a,b) => a&&b);
   var _or_gate = _two_wires_gate((a,b) => a||b);
 
-  // event-based
+  // event-based implementation
   var _and_gateEB = _two_wires_gateEB((a,b) => a&&b);
   var _or_gateEB = _two_wires_gateEB((a,b) => a||b);
 
@@ -332,6 +332,16 @@ var geiessicp = S = function(L) {
   function _AGENDA() {
     var _epoch = 0;
     var _events = {};
+
+    function _start() {
+      if (Object.keys(_events).length === 0) return;
+      if (_events[_epoch]) {
+        _events[_epoch].forEach(cb => cb());
+        delete _events[_epoch];
+      }
+      _epoch +=1;
+      setTimeout(_start, 0);
+    }
     
     function _addEvent(delay, cb) {
       try {
@@ -342,7 +352,8 @@ var geiessicp = S = function(L) {
     }
     return {
       isEmpty: () => (Object.keys(_events).length === 0),
-      addEvent: _addEvent
+      addEvent: _addEvent,
+      start: _start
     };
   }
 
