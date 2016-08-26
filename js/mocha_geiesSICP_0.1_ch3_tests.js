@@ -11,27 +11,7 @@
 var expect = chai.expect;
 
 describe('Implementing SICP chapter 3 brings to the implementation of', function () {
-  describe('an EVENT-BASED digital circuit simulation system, inside which', function () {
-    describe('an agenda', function () {
-      it('keeps track of all events involving inverters and gates', function() {
-        var agenda = S.agenda();
-        var a = S.wire('a');
-        var out = S.wire('out');
-        expect(agenda.isEmpty()).to.be.ok;
-        S.inverterEB(a, out, agenda);
-        expect(agenda.isEmpty()).to.be.not.ok;
-      });
-      it('runs simulations', function() {
-        var agenda = S.agenda();
-        var a = S.wire('a');
-        var out = S.wire('out');
-        S.inverterEB(a, out, agenda);
-        debugger;
-        agenda.start();
-      });
-    });
-  });
-  xdescribe('a digital circuit simulation system WITHOUT DELAYS, inside which', function () {
+  describe('a digital circuit simulation system WITHOUT DELAYS, inside which', function () {
     describe('a wire', function () {
       it('can carry signal, or not', function() {
         var wire = S.wire('test');
@@ -265,6 +245,71 @@ describe('Implementing SICP chapter 3 brings to the implementation of', function
         var rca = S.ripple_carry_adder(as, bs, ss, cout);
         expect(rca.sum(33539865,268289782)).to.be.equal(301829647);
       });
+    });
+  });
+  describe('an EVENT-BASED digital circuit simulation system, inside which', function () {
+    describe('an agenda', function () {
+      it('keeps track of all events involving inverters and gates', function() {
+        var agenda = S.agenda();
+        var a = S.wire('a');
+        var out = S.wire('out');
+        expect(agenda.is_empty()).to.be.ok;
+        S.inverterEB(a, out, 5, agenda);
+        expect(agenda.is_empty()).to.be.not.ok;
+      });
+      it('runs simple simulations', function() {
+        var probe = { value: 0 };
+        var agenda = S.agenda();
+        var a = S.wire('a');
+        var out = S.wire('out');
+        out.add_action(() => { probe.value += 1});
+        S.inverterEB(a, out, 5, agenda);
+        agenda.start();
+        expect(probe.value).to.be.equal(1);
+      });
+      it('runs more complex simulations', function() {
+        var agenda = S.agenda();
+        var input_1 = S.wire('input_1');
+        var input_2 = S.wire('input_2');
+        var sum = S.wire('sum');
+        var carry = S.wire('carry');
+        S.and_gateEB(input_1, input_2, sum, 10, agenda);
+        S.or_gateEB(input_1, input_2, carry, 8, agenda);
+        set_probe(input_2, agenda);
+        set_probe(sum, agenda);
+        set_probe(carry, agenda);
+        input_1.set(true);
+        input_2.set(true);
+        input_1.set(false);
+        agenda.start();
+      });
+      it('can carry out some pretty impressive simulations!! (check it out in the console...)', function() {
+        function wires(name, size, agenda) {
+          return Array(size).fill().map((x,i) => {
+            var result = S.wire(name + i);
+            set_probe(result, agenda);
+            return result;
+          });
+        }
+        var agenda = S.agenda();
+        var size = 30;
+        var as = wires('a', size, agenda);
+        var bs = wires('b', size, agenda);
+        var ss = wires('s', size, agenda);
+        var cout = S.wire('cout');
+        set_probe(cout, agenda);
+
+        var rca = S.ripple_carry_adderEB(as, bs, ss, cout, agenda);
+        var result = rca.sum(33539865,268289782)//).to.be.equal(301829647);
+        agenda.start();
+        expect(result).to.not.be.equal(301829647); // need promises for that!!
+      });
+      function set_probe(wire, agenda) {
+        wire.add_action(() => {
+          var msg = agenda.epoch() + ' - ' + wire.name() + '=' + wire.read();
+          console.log(msg);
+        });
+      }
     });
   });
 
